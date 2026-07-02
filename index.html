@@ -2,85 +2,94 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🍽️GROK CALORIE TRACKER</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🍽️GROK CALORIE</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto+Mono&display=swap');
     
     body {
       font-family: 'Roboto Mono', sans-serif;
       background: #0a0a0f;
       color: #00ffcc;
       margin: 0;
-      padding: 15px;
+      padding: 12px;
       min-height: 100vh;
-      background-image: 
-        radial-gradient(circle at 50% 20%, rgba(0, 255, 204, 0.08) 0%, transparent 50%);
+      background-image: radial-gradient(circle at 50% 30%, rgba(0, 255, 204, 0.1) 0%, transparent 60%);
     }
     h1 {
       text-align: center;
       font-family: 'Orbitron', sans-serif;
-      font-size: 2.4em;
-      background: linear-gradient(90deg, #00ffcc, #00aaff);
+      font-size: 1.95em;
+      background: linear-gradient(90deg, #00ffcc, #00bbff);
       -webkit-background-clip: text;
       color: transparent;
-      text-shadow: 0 0 30px #00ffcc;
-      letter-spacing: 4px;
+      margin: 10px 0 20px;
+      text-shadow: 0 0 25px #00ffcc;
     }
-    .container { max-width: 820px; margin: 0 auto; }
+    .container { max-width: 420px; margin: 0 auto; }
+    
     .card {
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(15, 23, 42, 0.96);
       border: 1px solid #00ffcc;
-      border-radius: 16px;
-      padding: 22px;
-      margin: 18px 0;
-      box-shadow: 0 0 30px rgba(0, 255, 204, 0.25);
+      border-radius: 18px;
+      padding: 18px;
+      margin: 14px 0;
+      box-shadow: 0 0 25px rgba(0, 255, 204, 0.25);
     }
     input, select {
       background: #111827;
       border: 1px solid #334155;
       color: #e0f2fe;
-      padding: 14px;
-      border-radius: 8px;
+      padding: 14px 16px;
+      border-radius: 10px;
       width: 100%;
+      font-size: 1.05em;
       margin: 8px 0;
     }
     button {
-      background: linear-gradient(45deg, #00ffcc, #00aaff);
+      background: linear-gradient(45deg, #00ffcc, #00bbff);
       color: #000;
       font-weight: bold;
-      padding: 14px;
+      font-size: 1.1em;
+      padding: 16px;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
       cursor: pointer;
-      transition: all 0.3s;
+      margin-top: 8px;
       width: 100%;
+      box-shadow: 0 4px 15px rgba(0, 255, 204, 0.4);
     }
-    button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 0 25px #00ffcc;
+    button:active {
+      transform: scale(0.97);
     }
     .entry {
       background: #1e2937;
-      padding: 12px 15px;
+      padding: 13px 15px;
       margin: 8px 0;
-      border-radius: 8px;
+      border-radius: 10px;
       border-left: 5px solid #00ffcc;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      font-size: 1.05em;
     }
     .delete {
       color: #ff3366;
+      font-size: 1.4em;
       font-weight: bold;
-      cursor: pointer;
+      padding: 0 8px;
     }
     .total {
-      font-size: 2em;
+      font-size: 1.85em;
       text-align: center;
       margin: 20px 0;
-      color: #00ffcc;
+      color: #67f7cc;
       text-shadow: 0 0 20px #00ffcc;
+    }
+    canvas {
+      border-radius: 12px;
+      margin-top: 15px;
     }
   </style>
 </head>
@@ -98,8 +107,8 @@
         <option value="間食">間食</option>
       </select>
       
-      <input type="number" id="calories" placeholder="カロリーを入力">
-      <button onclick="addMeal()">＋ 追加する</button>
+      <input type="number" id="calories" placeholder="カロリー入力" inputmode="numeric">
+      <button onclick="addMeal()">＋ 記録する</button>
     </div>
 
     <div class="card">
@@ -108,31 +117,25 @@
     </div>
 
     <button onclick="showGraph()">月間グラフを表示</button>
-    <canvas id="myChart" style="margin-top:25px; background:#0f172a; border-radius:12px; padding:10px;"></canvas>
+    <canvas id="myChart" height="220"></canvas>
   </div>
 
   <script>
     const dateInput = document.getElementById('date');
     dateInput.value = new Date().toISOString().split('T')[0];
 
-    function getData() {
-      return JSON.parse(localStorage.getItem('grokMealData') || '{}');
-    }
-
-    function saveData(data) {
-      localStorage.setItem('grokMealData', JSON.stringify(data));
-    }
+    function getData() { return JSON.parse(localStorage.getItem('grokMealData') || '{}'); }
+    function saveData(data) { localStorage.setItem('grokMealData', JSON.stringify(data)); }
 
     function addMeal() {
       const date = dateInput.value;
       const type = document.getElementById('mealType').value;
       const cal = parseInt(document.getElementById('calories').value);
 
-      if (!cal || cal <= 0) return alert("カロリー入れろよ");
+      if (!cal || cal <= 0) return alert("カロリーを正しく入力しろ");
 
       let allData = getData();
       if (!allData[date]) allData[date] = [];
-
       allData[date].push({ type, cal });
       saveData(allData);
 
@@ -145,7 +148,7 @@
       const allData = getData();
       const entries = allData[date] || [];
       
-      let html = `<h3 style="margin:0 0 15px 0;">${date} の記録</h3>`;
+      let html = `<h3 style="margin:8px 0 12px;">${date}</h3>`;
       let total = 0;
 
       entries.forEach((entry, i) => {
@@ -157,8 +160,8 @@
           </div>`;
       });
 
-      document.getElementById('todayLog').innerHTML = html || '<p style="color:#64748b;">まだ記録なし</p>';
-      document.getElementById('todayTotal').innerHTML = `合計: <b>${total}</b> kcal`;
+      document.getElementById('todayLog').innerHTML = html || '<p style="color:#64748b; text-align:center;">まだ何も記録してないぞ</p>';
+      document.getElementById('todayTotal').innerHTML = `合計 <b>${total}</b> kcal`;
     }
 
     function deleteEntry(date, index) {
@@ -176,7 +179,7 @@
       const dates = Object.keys(allData).sort();
       const totals = dates.map(d => allData[d].reduce((sum, e) => sum + e.cal, 0));
 
-      if (dates.length === 0) return alert("データがまだないぞ");
+      if (dates.length === 0) return alert("まだデータがない");
 
       const ctx = document.getElementById('myChart');
       if (window.myChartInstance) window.myChartInstance.destroy();
@@ -186,22 +189,21 @@
         data: {
           labels: dates,
           datasets: [{
-            label: '1日の合計カロリー',
+            label: '1日の合計',
             data: totals,
             borderColor: '#00ffcc',
-            backgroundColor: 'rgba(0, 255, 204, 0.15)',
+            backgroundColor: 'rgba(0, 255, 204, 0.2)',
             tension: 0.4,
-            borderWidth: 4
+            borderWidth: 3.5
           }]
         },
         options: {
           responsive: true,
-          plugins: {
-            legend: { labels: { color: '#a5f3fc' } }
-          },
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#a5f3fc', font: {size: 14} } } },
           scales: {
-            x: { ticks: { color: '#64748b' } },
-            y: { ticks: { color: '#64748b' }, beginAtZero: true, grid: { color: '#1e2937' } }
+            x: { ticks: { color: '#94a3b8', font: {size: 12} } },
+            y: { ticks: { color: '#94a3b8', font: {size: 12} }, beginAtZero: true }
           }
         }
       });
