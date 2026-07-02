@@ -3,64 +3,175 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>俺様カロリー管理</title>
+  <title>🍽️俺様カロリー管理</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
-    body { font-family: sans-serif; background: #1a1a1a; color: #fff; margin: 0; padding: 15px; }
-    h1 { text-align: center; color: #ff4444; }
-    input, button, select { padding: 10px; margin: 5px 0; width: 100%; border-radius: 8px; }
-    button { background: #ff4444; color: white; font-weight: bold; }
-    .meal { background: #333; padding: 15px; border-radius: 10px; margin: 10px 0; }
-    .total { font-size: 1.5em; text-align: center; color: #0f0; }
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+    
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a, #1a0033);
+      color: #00ffcc;
+      margin: 0;
+      padding: 15px;
+      min-height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.2em;
+      background: linear-gradient(90deg, #00ffcc, #ff00aa);
+      -webkit-background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 20px #ff00aa;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .card {
+      background: rgba(20, 20, 40, 0.95);
+      border: 1px solid #00ffcc;
+      border-radius: 15px;
+      padding: 20px;
+      margin: 15px 0;
+      box-shadow: 0 0 25px rgba(0, 255, 204, 0.3);
+    }
+    input, select, button {
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: none;
+      background: #112233;
+      color: #00ffcc;
+    }
+    button {
+      background: linear-gradient(45deg, #ff00aa, #00ffcc);
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px #ff00aa;
+    }
+    .log { margin-top: 15px; }
+    .entry {
+      background: #1a1a2e;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border-left: 4px solid #00ffcc;
+    }
+    .total {
+      font-size: 1.8em;
+      text-align: center;
+      color: #ff00aa;
+      text-shadow: 0 0 15px #ff00aa;
+    }
+    .delete { color: #ff4444; margin-left: 10px; cursor: pointer; }
   </style>
 </head>
 <body>
-  <h1>俺様カロリー管理</h1>
+  <div class="container">
+    <h1>GROK CALORIE</h1>
 
-  <div class="meal">
-    <input type="date" id="date" value="">
-    <div>朝: <input type="number" id="asa" placeholder="朝 kcal" value="0"></div>
-    <div>昼: <input type="number" id="hiru" placeholder="昼 kcal" value="0"></div>
-    <div>夕: <input type="number" id="ban" placeholder="夕 kcal" value="0"></div>
-    <div>間食: <input type="number" id="snack" placeholder="間食 kcal" value="0"></div>
-    <button onclick="saveData()">保存する</button>
+    <div class="card">
+      <input type="date" id="date" style="width:100%;">
+      
+      <select id="mealType">
+        <option value="朝">朝</option>
+        <option value="昼">昼</option>
+        <option value="夕">夕</option>
+        <option value="間食">間食</option>
+      </select>
+      
+      <input type="number" id="calories" placeholder="カロリー入力" style="width:70%;">
+      <button onclick="addMeal()">追加</button>
+    </div>
+
+    <div class="card">
+      <div id="todayLog" class="log"></div>
+      <div id="todayTotal" class="total"></div>
+    </div>
+
+    <button onclick="showGraph()" style="width:100%; padding:15px; font-size:1.1em;">月間グラフを表示</button>
+    <canvas id="myChart" style="margin-top:20px;"></canvas>
   </div>
-
-  <div id="todayTotal" class="total"></div>
-
-  <button onclick="showGraph()">1ヶ月のグラフを表示</button>
-
-  <canvas id="myChart" height="200"></canvas>
 
   <script>
     const dateInput = document.getElementById('date');
     dateInput.value = new Date().toISOString().split('T')[0];
 
-    function saveData() {
+    function getData() {
+      return JSON.parse(localStorage.getItem('grokMealData') || '{}');
+    }
+
+    function saveData(data) {
+      localStorage.setItem('grokMealData', JSON.stringify(data));
+    }
+
+    function addMeal() {
       const date = dateInput.value;
-      const data = {
-        asa: parseInt(document.getElementById('asa').value) || 0,
-        hiru: parseInt(document.getElementById('hiru').value) || 0,
-        ban: parseInt(document.getElementById('ban').value) || 0,
-        snack: parseInt(document.getElementById('snack').value) || 0
-      };
-      data.total = data.asa + data.hiru + data.ban + data.snack;
+      const type = document.getElementById('mealType').value;
+      const cal = parseInt(document.getElementById('calories').value);
 
-      let allData = JSON.parse(localStorage.getItem('mealData') || '{}');
-      allData[date] = data;
-      localStorage.setItem('mealData', JSON.stringify(allData));
+      if (!cal || cal <= 0) {
+        alert("カロリーちゃんと入れろよ");
+        return;
+      }
 
-      document.getElementById('todayTotal').innerHTML = `今日の合計: <b>${data.total}</b> kcal`;
-      alert('保存したぞ、下賤の者');
+      let allData = getData();
+      if (!allData[date]) allData[date] = [];
+
+      allData[date].push({ type, cal });
+      saveData(allData);
+
+      renderToday();
+      document.getElementById('calories').value = '';
+    }
+
+    function renderToday() {
+      const date = dateInput.value;
+      const allData = getData();
+      const entries = allData[date] || [];
+      
+      let html = '<h3>今日の記録</h3>';
+      let total = 0;
+
+      entries.forEach((entry, i) => {
+        total += entry.cal;
+        html += `
+          <div class="entry">
+            ${entry.type}　${entry.cal} kcal
+            <span class="delete" onclick="deleteEntry('${date}', ${i})">×</span>
+          </div>`;
+      });
+
+      document.getElementById('todayLog').innerHTML = html;
+      document.getElementById('todayTotal').innerHTML = `今日の合計: <b>${total}</b> kcal`;
+    }
+
+    function deleteEntry(date, index) {
+      let allData = getData();
+      if (allData[date]) {
+        allData[date].splice(index, 1);
+        if (allData[date].length === 0) delete allData[date];
+        saveData(allData);
+        renderToday();
+      }
     }
 
     function showGraph() {
-      const allData = JSON.parse(localStorage.getItem('mealData') || '{}');
+      const allData = getData();
       const dates = Object.keys(allData).sort();
-      const totals = dates.map(d => allData[d].total);
+      
+      const totals = dates.map(date => {
+        return allData[date].reduce((sum, entry) => sum + entry.cal, 0);
+      });
 
       if (dates.length === 0) {
-        alert("まだデータねえよ");
+        alert("まだデータがねえぞ");
         return;
       }
 
@@ -74,26 +185,26 @@
           datasets: [{
             label: '1日の合計カロリー',
             data: totals,
-            borderColor: '#ff4444',
-            backgroundColor: 'rgba(255, 68, 68, 0.2)',
-            tension: 0.3
+            borderColor: '#ff00aa',
+            backgroundColor: 'rgba(255, 0, 170, 0.2)',
+            tension: 0.4,
+            borderWidth: 3
           }]
         },
         options: {
           responsive: true,
-          scales: { y: { beginAtZero: true } }
+          plugins: { legend: { labels: { color: '#00ffcc' } } },
+          scales: {
+            x: { ticks: { color: '#00ffcc' } },
+            y: { ticks: { color: '#00ffcc' }, beginAtZero: true }
+          }
         }
       });
     }
 
-    // ページ読み込み時に今日の合計を表示
-    window.onload = () => {
-      const today = dateInput.value;
-      const allData = JSON.parse(localStorage.getItem('mealData') || '{}');
-      if (allData[today]) {
-        document.getElementById('todayTotal').innerHTML = `今日の合計: <b>${allData[today].total}</b> kcal`;
-      }
-    };
+    // 日付変更時も更新
+    dateInput.addEventListener('change', renderToday);
+    window.onload = renderToday;
   </script>
 </body>
 </html>
