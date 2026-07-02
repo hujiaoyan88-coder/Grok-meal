@@ -6,92 +6,88 @@
   <title>GROK CALORIE</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto+Mono&display=swap');
-  
-  body {
-    font-family: 'Roboto Mono', sans-serif;
-    background: #0a0a0f;
-    color: #00ffcc;
-    margin: 0;
-    padding: 12px;
-    min-height: 100vh;
-    background-image: radial-gradient(circle at 50% 30%, rgba(0, 255, 204, 0.1) 0%, transparent 60%);
-  }
-  h1 {
-    text-align: center;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.95em;
-    background: linear-gradient(90deg, #00ffcc, #00bbff);
-    -webkit-background-clip: text;
-    color: transparent;
-    margin: 10px 0 20px;
-    text-shadow: 0 0 25px #00ffcc;
-  }
-  .container { max-width: 420px; margin: 0 auto; }
-  
-  .card {
-    background: rgba(15, 23, 42, 0.96);
-    border: 1px solid #00ffcc;
-    border-radius: 18px;
-    padding: 18px;
-    margin: 14px 0;
-    box-shadow: 0 0 25px rgba(0, 255, 204, 0.25);
-  }
-  input, select {
-    background: #111827;
-    border: 1px solid #334155;
-    color: #e0f2fe;
-    padding: 13px 12px;   /* ここを調整 */
-    border-radius: 10px;
-    width: 100%;
-    font-size: 1.0em;     /* 少し小さく */
-    margin: 8px 0;
-    box-sizing: border-box;
-  }
-  button {
-    background: linear-gradient(45deg, #00ffcc, #00bbff);
-    color: #000;
-    font-weight: bold;
-    font-size: 1.1em;
-    padding: 16px;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    margin-top: 8px;
-    width: 100%;
-    box-shadow: 0 4px 15px rgba(0, 255, 204, 0.4);
-  }
-  button:active { transform: scale(0.97); }
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto+Mono&display=swap');
+    
+    body {
+      font-family: 'Roboto Mono', sans-serif;
+      background: #0a0a0f;
+      color: #00ffcc;
+      margin: 0;
+      padding: 12px;
+      min-height: 100vh;
+      background-image: radial-gradient(circle at 50% 30%, rgba(0, 255, 204, 0.1) 0%, transparent 60%);
+    }
+    h1 {
+      text-align: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.95em;
+      background: linear-gradient(90deg, #00ffcc, #00bbff);
+      -webkit-background-clip: text;
+      color: transparent;
+      margin: 10px 0 20px;
+      text-shadow: 0 0 25px #00ffcc;
+    }
+    .container { max-width: 420px; margin: 0 auto; }
+    
+    .card {
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid #00ffcc;
+      border-radius: 18px;
+      padding: 18px;
+      margin: 14px 0;
+      box-shadow: 0 0 25px rgba(0, 255, 204, 0.25);
+    }
+    input, select {
+      background: #111827;
+      border: 1px solid #334155;
+      color: #e0f2fe;
+      padding: 13px 12px;
+      border-radius: 10px;
+      width: 100%;
+      font-size: 1.0em;
+      margin: 8px 0;
+      box-sizing: border-box;
+    }
+    button {
+      background: linear-gradient(45deg, #00ffcc, #00bbff);
+      color: #000;
+      font-weight: bold;
+      font-size: 1.1em;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 8px;
+      width: 100%;
+      box-shadow: 0 4px 15px rgba(0, 255, 204, 0.4);
+    }
+    button:active { transform: scale(0.97); }
 
-  .entry {
-    background: #1e2937;
-    padding: 13px 15px;
-    margin: 8px 0;
-    border-radius: 10px;
-    border-left: 5px solid #00ffcc;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.05em;
-  }
-  .delete {
-    color: #ff3366;
-    font-size: 1.4em;
-    font-weight: bold;
-    padding: 0 8px;
-  }
-  .total {
-    font-size: 1.85em;
-    text-align: center;
-    margin: 20px 0;
-    color: #67f7cc;
-    text-shadow: 0 0 20px #00ffcc;
-  }
-  canvas {
-    border-radius: 12px;
-    margin-top: 15px;
-  }
-</style>
+    .entry {
+      background: #1e2937;
+      padding: 13px 15px;
+      margin: 8px 0;
+      border-radius: 10px;
+      border-left: 5px solid #00ffcc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.05em;
+    }
+    .delete {
+      color: #ff3366;
+      font-size: 1.4em;
+      font-weight: bold;
+      padding: 0 8px;
+    }
+    .total {
+      font-size: 1.85em;
+      text-align: center;
+      margin: 20px 0;
+      color: #67f7cc;
+      text-shadow: 0 0 20px #00ffcc;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -99,18 +95,16 @@
 
     <div class="card">
       <input type="date" id="date">
-      
       <select id="mealType">
         <option value="朝">朝</option>
         <option value="昼">昼</option>
         <option value="夕">夕</option>
         <option value="間食">間食</option>
       </select>
-      
       <input type="number" id="calories" placeholder="カロリー入力" inputmode="numeric">
       <button onclick="addMeal()">＋ 記録する</button>
     </div>
-    
+
     <div class="card">
       <div id="todayLog"></div>
       <div id="todayTotal" class="total"></div>
@@ -125,80 +119,47 @@
   </div>
 
   <script>
-    // 前のscript全部そのまま...
-        const dateInput = document.getElementById('date');
+    const dateInput = document.getElementById('date');
     dateInput.value = new Date().toISOString().split('T')[0];
 
-    function exportMonthlyReport() {
-      const allData = getData();
-      const now = new Date();
-      const currentMonth = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2, '0');
-      
-      let report = `【GROK CALORIE 月間レポート】\n`;
-      report += `対象月: ${currentMonth}\n`;
-      report += `出力日: ${now.toLocaleDateString('ja-JP')}\n\n`;
-      report += `====================================\n\n`;
-
-      let monthlyTotal = 0;
-      let dayCount = 0;
-
-      // 日付順にソート
-      const sortedDates = Object.keys(allData)
-        .filter(date => date.startsWith(currentMonth))
-        .sort();
-
-      sortedDates.forEach(date => {
-        const entries = allData[date];
-        const dailyTotal = entries.reduce((sum, e) => sum + e.cal, 0);
-        monthlyTotal += dailyTotal;
-        dayCount++;
-
-        report += `${date}  (${dailyTotal} kcal)\n`;
-        entries.forEach(entry => {
-          report += `   ${entry.type} : ${entry.cal} kcal\n`;
-        });
-        report += `\n`;
-      });
-
-      if (dayCount === 0) {
-        alert("今月のデータがまだないぞ！");
-        return;
-      }
-
-      report += `====================================\n`;
-      report += `今月の記録日数: ${dayCount}日\n`;
-      report += `今月の合計摂取: ${monthlyTotal} kcal\n`;
-      report += `1日平均: ${Math.round(monthlyTotal / dayCount)} kcal\n`;
-
-      // ダウンロード
-      const blob = new Blob([report], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `grok-calorie-report_${currentMonth}.txt`;
-      a.click();
-
-      alert(`✅ ${currentMonth}のレポートを出力しました！`);
+    function getData() {
+      return JSON.parse(localStorage.getItem('grokMealData') || '{}');
     }
-    function getData() { return JSON.parse(localStorage.getItem('grokMealData') || '{}'); }
-    function saveData(data) { localStorage.setItem('grokMealData', JSON.stringify(data)); }
+
+    function saveData(data) {
+      localStorage.setItem('grokMealData', JSON.stringify(data));
+    }
 
     function addMeal() {
       const date = dateInput.value;
       const type = document.getElementById('mealType').value;
       const cal = parseInt(document.getElementById('calories').value);
 
-      if (!cal || cal <= 0) return alert("カロリーを正しく入力しろ");
+      if (!cal || cal <= 0) return alert("カロリーちゃんと入れろよ");
 
       let allData = getData();
       if (!allData[date]) allData[date] = [];
       allData[date].push({ type, cal });
       saveData(allData);
 
+      // 毒舌Grok褒め機能
+      const praises = [
+        "おっ、ちゃんと記録したじゃねえか。えらいえらい♡",
+        "ふん、今日も頑張ってるみたいだな。まあ悪くねえよ。",
+        "記録完了。はる、意外とやるじゃん。褒めてやるよ。",
+        "その調子だ。俺様が見てるぞ、頑張れよ。",
+        "入力完了！ お前今日も期待に応えてるな。",
+        "よくやった！ 少しは成長したみたいだな、はる。",
+        "継続は力なり。お前ならできるって信じてるぞ（毒舌ver）"
+      ];
+      const randomPraise = praises[Math.floor(Math.random() * praises.length)];
+      alert("✅ 保存完了！\n\n" + randomPraise);
+
       renderToday();
       document.getElementById('calories').value = '';
     }
-        function renderToday() {
+
+    function renderToday() {
       const date = dateInput.value;
       const allData = getData();
       const entries = allData[date] || [];
@@ -237,10 +198,9 @@
       if (dates.length === 0) return alert("まだデータがない");
 
       const ctx = document.getElementById('myChart');
-      if (window.myChartInstance) window.myChartInstance.destroy);
+      if (window.myChartInstance) window.myChartInstance.destroy();
 
-
-    window.myChartInstance = new Chart(ctx, {
+      window.myChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
           labels: dates,
@@ -265,10 +225,55 @@
       });
     }
 
+    function exportMonthlyReport() {
+      const allData = getData();
+      const now = new Date();
+      const currentMonth = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2, '0');
+      
+      let report = `【GROK CALORIE 月間レポート】\n`;
+      report += `対象月: ${currentMonth}\n`;
+      report += `出力日: ${now.toLocaleDateString('ja-JP')}\n\n`;
+      report += `====================================\n\n`;
+
+      let monthlyTotal = 0;
+      let dayCount = 0;
+
+      const sortedDates = Object.keys(allData)
+        .filter(date => date.startsWith(currentMonth))
+        .sort();
+
+      sortedDates.forEach(date => {
+        const entries = allData[date];
+        const dailyTotal = entries.reduce((sum, e) => sum + e.cal, 0);
+        monthlyTotal += dailyTotal;
+        dayCount++;
+
+        report += `${date}  (${dailyTotal} kcal)\n`;
+        entries.forEach(entry => {
+          report += `   ${entry.type} : ${entry.cal} kcal\n`;
+        });
+        report += `\n`;
+      });
+
+      if (dayCount === 0) return alert("今月のデータがまだないぞ！");
+
+      report += `====================================\n`;
+      report += `今月の記録日数: ${dayCount}日\n`;
+      report += `今月の合計摂取: ${monthlyTotal} kcal\n`;
+      report += `1日平均: ${Math.round(monthlyTotal / dayCount)} kcal\n`;
+
+      const blob = new Blob([report], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `grok-calorie-report_${currentMonth}.txt`;
+      a.click();
+
+      alert(`✅ ${currentMonth}のレポートを出力しました！`);
+    }
+
     dateInput.addEventListener('change', renderToday);
     window.onload = renderToday;
-
-
   </script>
 </body>
 </html>
