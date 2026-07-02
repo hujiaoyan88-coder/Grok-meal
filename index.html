@@ -87,6 +87,13 @@
       color: #67f7cc;
       text-shadow: 0 0 20px #00ffcc;
     }
+    canvas{
+    display:block;
+    width:100% !important;
+    height:320px !important;
+    background:#0f172a;
+    border-radius:12px;
+}
   </style>
 </head>
 <body>
@@ -197,8 +204,12 @@
 
       if (dates.length === 0) return alert("まだデータがない");
 
-      const ctx = document.getElementById('myChart');
-      if (window.myChartInstance) window.myChartInstance.destroy();
+      const canvas = document.getElementById("myChart");
+　　　const ctx = canvas.getContext("2d");
+
+　　　if(myChartInstance){
+   　　　 myChartInstance.destroy();
+　　　}
 
       window.myChartInstance = new Chart(ctx, {
         type: 'line',
@@ -273,7 +284,13 @@
     }
 
     dateInput.addEventListener('change', renderToday);
-    window.onload = renderToday;
+    window.addEventListener("load", () => {
+    renderToday();
+
+    requestAnimationFrame(() => {
+        showGraph();
+    });
+});
   </script>
 </body>
 </html>
