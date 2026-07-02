@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>俺様カロリー管理</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    body { font-family: sans-serif; background: #1a1a1a; color: #fff; margin: 0; padding: 15px; }
+    h1 { text-align: center; color: #ff4444; }
+    input, button, select { padding: 10px; margin: 5px 0; width: 100%; border-radius: 8px; }
+    button { background: #ff4444; color: white; font-weight: bold; }
+    .meal { background: #333; padding: 15px; border-radius: 10px; margin: 10px 0; }
+    .total { font-size: 1.5em; text-align: center; color: #0f0; }
+  </style>
+</head>
+<body>
+  <h1>俺様カロリー管理</h1>
+
+  <div class="meal">
+    <input type="date" id="date" value="">
+    <div>朝: <input type="number" id="asa" placeholder="朝 kcal" value="0"></div>
+    <div>昼: <input type="number" id="hiru" placeholder="昼 kcal" value="0"></div>
+    <div>夕: <input type="number" id="ban" placeholder="夕 kcal" value="0"></div>
+    <div>間食: <input type="number" id="snack" placeholder="間食 kcal" value="0"></div>
+    <button onclick="saveData()">保存する</button>
+  </div>
+
+  <div id="todayTotal" class="total"></div>
+
+  <button onclick="showGraph()">1ヶ月のグラフを表示</button>
+
+  <canvas id="myChart" height="200"></canvas>
+
+  <script>
+    const dateInput = document.getElementById('date');
+    dateInput.value = new Date().toISOString().split('T')[0];
+
+    function saveData() {
+      const date = dateInput.value;
+      const data = {
+        asa: parseInt(document.getElementById('asa').value) || 0,
+        hiru: parseInt(document.getElementById('hiru').value) || 0,
+        ban: parseInt(document.getElementById('ban').value) || 0,
+        snack: parseInt(document.getElementById('snack').value) || 0
+      };
+      data.total = data.asa + data.hiru + data.ban + data.snack;
+
+      let allData = JSON.parse(localStorage.getItem('mealData') || '{}');
+      allData[date] = data;
+      localStorage.setItem('mealData', JSON.stringify(allData));
+
+      document.getElementById('todayTotal').innerHTML = `今日の合計: <b>${data.total}</b> kcal`;
+      alert('保存したぞ、下賤の者');
+    }
+
+    function showGraph() {
+      const allData = JSON.parse(localStorage.getItem('mealData') || '{}');
+      const dates = Object.keys(allData).sort();
+      const totals = dates.map(d => allData[d].total);
+
+      if (dates.length === 0) {
+        alert("まだデータねえよ");
+        return;
+      }
+
+      const ctx = document.getElementById('myChart');
+      if (window.myChartInstance) window.myChartInstance.destroy();
+
+      window.myChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: [{
+            label: '1日の合計カロリー',
+            data: totals,
+            borderColor: '#ff4444',
+            backgroundColor: 'rgba(255, 68, 68, 0.2)',
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    // ページ読み込み時に今日の合計を表示
+    window.onload = () => {
+      const today = dateInput.value;
+      const allData = JSON.parse(localStorage.getItem('mealData') || '{}');
+      if (allData[today]) {
+        document.getElementById('todayTotal').innerHTML = `今日の合計: <b>${allData[today].total}</b> kcal`;
+      }
+    };
+  </script>
+</body>
+</html>
