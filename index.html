@@ -6,92 +6,92 @@
   <title>🍽️GROK CALORIE</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto+Mono&display=swap');
-    
-    body {
-      font-family: 'Roboto Mono', sans-serif;
-      background: #0a0a0f;
-      color: #00ffcc;
-      margin: 0;
-      padding: 12px;
-      min-height: 100vh;
-      background-image: radial-gradient(circle at 50% 30%, rgba(0, 255, 204, 0.1) 0%, transparent 60%);
-    }
-    h1 {
-      text-align: center;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1.95em;
-      background: linear-gradient(90deg, #00ffcc, #00bbff);
-      -webkit-background-clip: text;
-      color: transparent;
-      margin: 10px 0 20px;
-      text-shadow: 0 0 25px #00ffcc;
-    }
-    .container { max-width: 420px; margin: 0 auto; }
-    
-    .card {
-      background: rgba(15, 23, 42, 0.96);
-      border: 1px solid #00ffcc;
-      border-radius: 18px;
-      padding: 18px;
-      margin: 14px 0;
-      box-shadow: 0 0 25px rgba(0, 255, 204, 0.25);
-    }
-    input, select {
-      background: #111827;
-      border: 1px solid #334155;
-      color: #e0f2fe;
-      padding: 14px 16px;
-      border-radius: 10px;
-      width: 100px;
-      font-size: 1.05em;
-      margin: 8px 0;
-    }
-    button {
-      background: linear-gradient(45deg, #00ffcc, #00bbff);
-      color: #000;
-      font-weight: bold;
-      font-size: 1.1em;
-      padding: 16px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      margin-top: 8px;
-      width: 100%;
-      box-shadow: 0 4px 15px rgba(0, 255, 204, 0.4);
-    }
-    button:active {
-      transform: scale(0.97);
-    }
-    .entry {
-      background: #1e2937;
-      padding: 13px 15px;
-      margin: 8px 0;
-      border-radius: 10px;
-      border-left: 5px solid #00ffcc;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 1.05em;
-    }
-    .delete {
-      color: #ff3366;
-      font-size: 1.4em;
-      font-weight: bold;
-      padding: 0 8px;
-    }
-    .total {
-      font-size: 1.85em;
-      text-align: center;
-      margin: 20px 0;
-      color: #67f7cc;
-      text-shadow: 0 0 20px #00ffcc;
-    }
-    canvas {
-      border-radius: 12px;
-      margin-top: 15px;
-    }
-  </style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto+Mono&display=swap');
+  
+  body {
+    font-family: 'Roboto Mono', sans-serif;
+    background: #0a0a0f;
+    color: #00ffcc;
+    margin: 0;
+    padding: 12px;
+    min-height: 100vh;
+    background-image: radial-gradient(circle at 50% 30%, rgba(0, 255, 204, 0.1) 0%, transparent 60%);
+  }
+  h1 {
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.95em;
+    background: linear-gradient(90deg, #00ffcc, #00bbff);
+    -webkit-background-clip: text;
+    color: transparent;
+    margin: 10px 0 20px;
+    text-shadow: 0 0 25px #00ffcc;
+  }
+  .container { max-width: 420px; margin: 0 auto; }
+  
+  .card {
+    background: rgba(15, 23, 42, 0.96);
+    border: 1px solid #00ffcc;
+    border-radius: 18px;
+    padding: 18px;
+    margin: 14px 0;
+    box-shadow: 0 0 25px rgba(0, 255, 204, 0.25);
+  }
+  input, select {
+    background: #111827;
+    border: 1px solid #334155;
+    color: #e0f2fe;
+    padding: 13px 12px;   /* ここを調整 */
+    border-radius: 10px;
+    width: 100%;
+    font-size: 1.0em;     /* 少し小さく */
+    margin: 8px 0;
+    box-sizing: border-box;
+  }
+  button {
+    background: linear-gradient(45deg, #00ffcc, #00bbff);
+    color: #000;
+    font-weight: bold;
+    font-size: 1.1em;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 8px;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(0, 255, 204, 0.4);
+  }
+  button:active { transform: scale(0.97); }
+
+  .entry {
+    background: #1e2937;
+    padding: 13px 15px;
+    margin: 8px 0;
+    border-radius: 10px;
+    border-left: 5px solid #00ffcc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.05em;
+  }
+  .delete {
+    color: #ff3366;
+    font-size: 1.4em;
+    font-weight: bold;
+    padding: 0 8px;
+  }
+  .total {
+    font-size: 1.85em;
+    text-align: center;
+    margin: 20px 0;
+    color: #67f7cc;
+    text-shadow: 0 0 20px #00ffcc;
+  }
+  canvas {
+    border-radius: 12px;
+    margin-top: 15px;
+  }
+</style>
 </head>
 <body>
   <div class="container">
