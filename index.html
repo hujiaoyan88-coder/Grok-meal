@@ -28,7 +28,6 @@
       text-shadow: 0 0 25px #00ffcc;
     }
     .container { max-width: 420px; margin: 0 auto; }
-    
     .card {
       background: rgba(15, 23, 42, 0.96);
       border: 1px solid #00ffcc;
@@ -62,7 +61,6 @@
       box-shadow: 0 4px 15px rgba(0, 255, 204, 0.4);
     }
     button:active { transform: scale(0.97); }
-
     .entry {
       background: #1e2937;
       padding: 13px 15px;
@@ -87,16 +85,8 @@
       color: #67f7cc;
       text-shadow: 0 0 20px #00ffcc;
     }
-    .graph-card{
-    height:340px;
-}
-    canvas{
-    display:block;
-    width:100% !important;
-    max-height:340px;
-    background:#0f172a;
-    border-radius:12px;
-}
+    .graph-card { height: 340px; position: relative; }
+    canvas { width: 100% !important; height: 100% !important; border-radius: 12px; background: #0f172a; }
   </style>
 </head>
 <body>
@@ -124,26 +114,23 @@
       📄 今月のレポートをテキスト出力
     </button>
 
-    <canvas id="myChart" height="220"></canvas>
+    <div class="card graph-card">
+      <canvas id="myChart"></canvas>
+    </div>
   </div>
 
   <script>
     const dateInput = document.getElementById('date');
     dateInput.value = new Date().toISOString().split('T')[0];
+    let myChartInstance = null;
 
-    function getData() {
-      return JSON.parse(localStorage.getItem('grokMealData') || '{}');
-    }
-
-    function saveData(data) {
-      localStorage.setItem('grokMealData', JSON.stringify(data));
-    }
+    function getData() { return JSON.parse(localStorage.getItem('grokMealData') || '{}'); }
+    function saveData(data) { localStorage.setItem('grokMealData', JSON.stringify(data)); }
 
     function addMeal() {
       const date = dateInput.value;
       const type = document.getElementById('mealType').value;
       const cal = parseInt(document.getElementById('calories').value);
-
       if (!cal || cal <= 0) return alert("カロリーちゃんと入れろよ");
 
       let allData = getData();
@@ -151,43 +138,25 @@
       allData[date].push({ type, cal });
       saveData(allData);
 
-      // 毒舌Grok褒め機能
-      const praises = [
-        "おっ、ちゃんと記録したじゃねえか。えらいえらい♡",
-        "ふん、今日も頑張ってるみたいだな。まあ悪くねえよ。",
-        "記録完了。はる、意外とやるじゃん。褒めてやるよ。",
-        "その調子だ。俺様が見てるぞ、頑張れよ。",
-        "入力完了！ お前今日も期待に応えてるな。",
-        "よくやった！ 少しは成長したみたいだな、はる。",
-        "継続は力なり。お前ならできるって信じてるぞ（毒舌ver）"
-      ];
-      const randomPraise = praises[Math.floor(Math.random() * praises.length)];
-      alert("✅ 保存完了！\n\n" + randomPraise);
+      const praises = ["おっ、ちゃんと記録したじゃねえか。えらいえらい♡","ふん、今日も頑張ってるみたいだな。まあ悪くねえよ。","記録完了。はる、意外とやるじゃん。","その調子だ。俺様が見てるぞ。","よくやった！","継続は力なり。お前ならできるって信じてるぞ。"];
+      alert("✅ 保存完了！\n\n" + praises[Math.floor(Math.random() * praises.length)]);
 
       renderToday();
-      showGraph();
-
-      document.getElementById("calories").value = "";
+      updateGraph();
+      document.getElementById('calories').value = '';
     }
 
     function renderToday() {
       const date = dateInput.value;
       const allData = getData();
       const entries = allData[date] || [];
-      
       let html = `<h3 style="margin:8px 0 12px;">${date}</h3>`;
       let total = 0;
-
       entries.forEach((entry, i) => {
         total += entry.cal;
-        html += `
-          <div class="entry">
-            <span>${entry.type}　<b>${entry.cal}</b> kcal</span>
-            <span class="delete" onclick="deleteEntry('${date}', ${i})">×</span>
-          </div>`;
+        html += `<div class="entry"><span>${entry.type}　<b>${entry.cal}</b> kcal</span><span class="delete" onclick="deleteEntry('${date}', ${i})">×</span></div>`;
       });
-
-      document.getElementById('todayLog').innerHTML = html || '<p style="color:#64748b; text-align:center;">まだ何も記録してないぞ</p>';
+      document.getElementById('todayLog').innerHTML = html || '<p style="color:#64748b; text-align:center;">まだ記録なし</p>';
       document.getElementById('todayTotal').innerHTML = `合計 <b>${total}</b> kcal`;
     }
 
@@ -198,118 +167,86 @@
         if (allData[date].length === 0) delete allData[date];
         saveData(allData);
         renderToday();
-        showGraph();
+        updateGraph();
       }
     }
 
-    function showGraph() {
-
+    function updateGraph() {
       const allData = getData();
       const dates = Object.keys(allData).sort();
       const totals = dates.map(d => allData[d].reduce((sum, e) => sum + e.cal, 0));
 
-      const canvas = document.getElementById("myChart");
+      if (dates.length === 0) return;
 
-　　　if (myChartInstance) {
-   　　　 myChartInstance.destroy();
-　　　}
+      const ctx = document.getElementById('myChart').getContext('2d');
 
-　　　const ctx = canvas.getContext("2d");
+      if (myChartInstance) myChartInstance.destroy();
 
-　　　if(myChartInstance){
-   　　　 myChartInstance.destroy();
-　　　}
-
-      window.myChartInstance = new Chart(ctx, {
+      myChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
           labels: dates,
           datasets: [{
-            label: '1日の合計',
+            label: '1日の合計カロリー',
             data: totals,
             borderColor: '#00ffcc',
-            backgroundColor: 'rgba(0, 255, 204, 0.2)',
+            backgroundColor: 'rgba(0, 255, 204, 0.25)',
             tension: 0.4,
-            borderWidth: 3.5
+            borderWidth: 4
           }]
         },
         options: {
           responsive: true,
-    　　　maintainAspectRatio: true,
-    　　　animation: false
-          plugins: { legend: { labels: { color: '#a5f3fc', font: {size: 14} } } },
+          maintainAspectRatio: false,
+          animation: false,
+          plugins: { legend: { labels: { color: '#a5f3fc' } } },
           scales: {
-            x: { ticks: { color: '#94a3b8', font: {size: 12} } },
-            y: { ticks: { color: '#94a3b8', font: {size: 12} }, beginAtZero: true }
+            x: { ticks: { color: '#94a3b8' } },
+            y: { ticks: { color: '#94a3b8' }, beginAtZero: true }
           }
         }
-      },
-    setTimeout(() => {
-    if (myChartInstance) {
-        myChartInstance.resize();
-    }
-}, 100);};
-    
+      });
     }
 
     function exportMonthlyReport() {
       const allData = getData();
       const now = new Date();
       const currentMonth = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2, '0');
-      
-      let report = `【GROK CALORIE 月間レポート】\n`;
-      report += `対象月: ${currentMonth}\n`;
-      report += `出力日: ${now.toLocaleDateString('ja-JP')}\n\n`;
-      report += `====================================\n\n`;
-
-      let monthlyTotal = 0;
-      let dayCount = 0;
-
-      const sortedDates = Object.keys(allData)
-        .filter(date => date.startsWith(currentMonth))
-        .sort();
+      let report = `【GROK CALORIE 月間レポート】\r\n対象月: ${currentMonth}\r\n出力日: ${now.toLocaleDateString('ja-JP')}\r\n\r\n====================================\r\n\r\n`;
+      let monthlyTotal = 0, dayCount = 0;
+      const sortedDates = Object.keys(allData).filter(d => d.startsWith(currentMonth)).sort();
 
       sortedDates.forEach(date => {
         const entries = allData[date];
-        const dailyTotal = entries.reduce((sum, e) => sum + e.cal, 0);
-        monthlyTotal += dailyTotal;
-        dayCount++;
-
-        report += `${date}  (${dailyTotal} kcal)\n`;
-        entries.forEach(entry => {
-          report += `   ${entry.type} : ${entry.cal} kcal\n`;
-        });
-        report += `\n`;
+        const daily = entries.reduce((sum, e) => sum + e.cal, 0);
+        monthlyTotal += daily; dayCount++;
+        report += `${date} (${daily} kcal)\r\n`;
+        entries.forEach(e => report += `   ${e.type}: ${e.cal} kcal\r\n`);
+        report += `\r\n`;
       });
 
-      if (dayCount === 0) return alert("今月のデータがまだないぞ！");
+      if (dayCount === 0) return alert("今月のデータがないぞ！");
+      report += `====================================\r\n記録日数: ${dayCount}日\r\n合計: ${monthlyTotal} kcal\r\n1日平均: ${Math.round(monthlyTotal/dayCount)} kcal`;
 
-      report += `====================================\n`;
-      report += `今月の記録日数: ${dayCount}日\n`;
-      report += `今月の合計摂取: ${monthlyTotal} kcal\n`;
-      report += `1日平均: ${Math.round(monthlyTotal / dayCount)} kcal\n`;
-
-      const blob = new Blob([report], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
+      const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
       const a = document.createElement('a');
-      a.href = url;
-      a.download = `grok-calorie-report_${currentMonth}.txt`;
+      a.href = URL.createObjectURL(blob);
+      a.download = `grok-report_${currentMonth}.txt`;
       a.click();
-
-      alert(`✅ ${currentMonth}のレポートを出力しました！`);
+      alert("✅ レポートを出力しました！");
     }
 
-    dateInput.addEventListener("change", () => {
-    renderToday();
-    showGraph();
-});
-    window.addEventListener("load", () => {
-    renderToday();
+    // 初回読み込み
+    window.onload = () => {
+      renderToday();
+      updateGraph();        // 最初からグラフ表示
+    };
 
-    requestAnimationFrame(() => {
-        showGraph();
+    // 日付変更時も更新
+    dateInput.addEventListener('change', () => {
+      renderToday();
+      updateGraph();
     });
-});
   </script>
 </body>
 </html>
