@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🍽️GROK CALORIE</title>
+  <title>GROK CALORIE</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto+Mono&display=swap');
@@ -110,20 +110,76 @@
       <input type="number" id="calories" placeholder="カロリー入力" inputmode="numeric">
       <button onclick="addMeal()">＋ 記録する</button>
     </div>
-
+    
     <div class="card">
       <div id="todayLog"></div>
       <div id="todayTotal" class="total"></div>
     </div>
 
     <button onclick="showGraph()">月間グラフを表示</button>
+    <button onclick="exportMonthlyReport()" style="background: linear-gradient(45deg, #00ccff, #00ffaa); margin-top: 10px;">
+      📄 今月のレポートをテキスト出力
+    </button>
+
     <canvas id="myChart" height="220"></canvas>
   </div>
 
   <script>
-    const dateInput = document.getElementById('date');
+    // 前のscript全部そのまま...
+        const dateInput = document.getElementById('date');
     dateInput.value = new Date().toISOString().split('T')[0];
 
+    function exportMonthlyReport() {
+      const allData = getData();
+      const now = new Date();
+      const currentMonth = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2, '0');
+      
+      let report = `【GROK CALORIE 月間レポート】\n`;
+      report += `対象月: ${currentMonth}\n`;
+      report += `出力日: ${now.toLocaleDateString('ja-JP')}\n\n`;
+      report += `====================================\n\n`;
+
+      let monthlyTotal = 0;
+      let dayCount = 0;
+
+      // 日付順にソート
+      const sortedDates = Object.keys(allData)
+        .filter(date => date.startsWith(currentMonth))
+        .sort();
+
+      sortedDates.forEach(date => {
+        const entries = allData[date];
+        const dailyTotal = entries.reduce((sum, e) => sum + e.cal, 0);
+        monthlyTotal += dailyTotal;
+        dayCount++;
+
+        report += `${date}  (${dailyTotal} kcal)\n`;
+        entries.forEach(entry => {
+          report += `   ${entry.type} : ${entry.cal} kcal\n`;
+        });
+        report += `\n`;
+      });
+
+      if (dayCount === 0) {
+        alert("今月のデータがまだないぞ！");
+        return;
+      }
+
+      report += `====================================\n`;
+      report += `今月の記録日数: ${dayCount}日\n`;
+      report += `今月の合計摂取: ${monthlyTotal} kcal\n`;
+      report += `1日平均: ${Math.round(monthlyTotal / dayCount)} kcal\n`;
+
+      // ダウンロード
+      const blob = new Blob([report], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `grok-calorie-report_${currentMonth}.txt`;
+      a.click();
+
+      alert(`✅ ${currentMonth}のレポートを出力しました！`);
+    }
     function getData() { return JSON.parse(localStorage.getItem('grokMealData') || '{}'); }
     function saveData(data) { localStorage.setItem('grokMealData', JSON.stringify(data)); }
 
@@ -142,8 +198,7 @@
       renderToday();
       document.getElementById('calories').value = '';
     }
-
-    function renderToday() {
+        function renderToday() {
       const date = dateInput.value;
       const allData = getData();
       const entries = allData[date] || [];
@@ -182,9 +237,10 @@
       if (dates.length === 0) return alert("まだデータがない");
 
       const ctx = document.getElementById('myChart');
-      if (window.myChartInstance) window.myChartInstance.destroy();
+      if (window.myChartInstance) window.myChartInstance.destroy);
 
-      window.myChartInstance = new Chart(ctx, {
+
+    window.myChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
           labels: dates,
@@ -211,6 +267,8 @@
 
     dateInput.addEventListener('change', renderToday);
     window.onload = renderToday;
+
+
   </script>
 </body>
 </html>
