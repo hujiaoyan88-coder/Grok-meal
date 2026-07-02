@@ -87,10 +87,13 @@
       color: #67f7cc;
       text-shadow: 0 0 20px #00ffcc;
     }
+    .graph-card{
+    height:340px;
+}
     canvas{
     display:block;
     width:100% !important;
-    height:320px !important;
+    max-height:340px;
     background:#0f172a;
     border-radius:12px;
 }
@@ -117,7 +120,6 @@
       <div id="todayTotal" class="total"></div>
     </div>
 
-    <button onclick="showGraph()">月間グラフを表示</button>
     <button onclick="exportMonthlyReport()" style="background: linear-gradient(45deg, #00ccff, #00ffaa); margin-top: 10px;">
       📄 今月のレポートをテキスト出力
     </button>
@@ -163,7 +165,9 @@
       alert("✅ 保存完了！\n\n" + randomPraise);
 
       renderToday();
-      document.getElementById('calories').value = '';
+      showGraph();
+
+      document.getElementById("calories").value = "";
     }
 
     function renderToday() {
@@ -194,17 +198,22 @@
         if (allData[date].length === 0) delete allData[date];
         saveData(allData);
         renderToday();
+        showGraph();
       }
     }
 
     function showGraph() {
+
       const allData = getData();
       const dates = Object.keys(allData).sort();
       const totals = dates.map(d => allData[d].reduce((sum, e) => sum + e.cal, 0));
 
-      if (dates.length === 0) return alert("まだデータがない");
-
       const canvas = document.getElementById("myChart");
+
+　　　if (myChartInstance) {
+   　　　 myChartInstance.destroy();
+　　　}
+
 　　　const ctx = canvas.getContext("2d");
 
 　　　if(myChartInstance){
@@ -226,14 +235,21 @@
         },
         options: {
           responsive: true,
-          maintainAspectRatio: false,
+    　　　maintainAspectRatio: true,
+    　　　animation: false
           plugins: { legend: { labels: { color: '#a5f3fc', font: {size: 14} } } },
           scales: {
             x: { ticks: { color: '#94a3b8', font: {size: 12} } },
             y: { ticks: { color: '#94a3b8', font: {size: 12} }, beginAtZero: true }
           }
         }
-      });
+      },
+    setTimeout(() => {
+    if (myChartInstance) {
+        myChartInstance.resize();
+    }
+}, 100);};
+    
     }
 
     function exportMonthlyReport() {
@@ -283,7 +299,10 @@
       alert(`✅ ${currentMonth}のレポートを出力しました！`);
     }
 
-    dateInput.addEventListener('change', renderToday);
+    dateInput.addEventListener("change", () => {
+    renderToday();
+    showGraph();
+});
     window.addEventListener("load", () => {
     renderToday();
 
