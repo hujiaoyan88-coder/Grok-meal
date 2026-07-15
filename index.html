@@ -172,27 +172,38 @@
     }
 
     function updateGraph() {
-      const allData = getData();
-      const dates = Object.keys(allData).sort();
-      const totals = dates.map(d => allData[d].reduce((sum, e) => sum + e.cal, 0));
+  const allData = getData();
+  const dates = Object.keys(allData).sort();
+  const totals = dates.map(d => allData[d].reduce((sum, e) => sum + e.cal, 0));
 
-      if (dates.length === 0) return;
+  if (dates.length === 0) return;
 
-      const ctx = document.getElementById('myChart').getContext('2d');
+  const ctx = document.getElementById('myChart').getContext('2d');
 
-      if (myChartInstance) myChartInstance.destroy();
+  if (myChartInstance) myChartInstance.destroy();
 
   myChartInstance = new Chart(ctx, {
     type: 'line',
-    data: { /* ... */ },
+    data: {
+      labels: dates,
+      datasets: [{
+        label: '1日の合計カロリー',
+        data: totals,
+        borderColor: '#00ffcc',
+        backgroundColor: 'rgba(0, 255, 204, 0.25)',
+        tension: 0.4,
+        borderWidth: 4
+      }]
+    },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       animation: false,
 
       plugins: { 
-        legend: { labels: { color: '#a5f3fc' } },
-        // annotationプラグインを使うならここに書く
+        legend: { 
+          labels: { color: '#a5f3fc' } 
+        },
         annotation: {
           annotations: {
             grokLine: {
