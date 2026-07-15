@@ -182,58 +182,50 @@
 
       if (myChartInstance) myChartInstance.destroy();
 
-      myChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: dates,
-          datasets: [{
-            label: '1日の合計カロリー',
-            data: totals,
-            borderColor: '#00ffcc',
-            backgroundColor: 'rgba(0, 255, 204, 0.25)',
-            tension: 0.4,
-            borderWidth: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          animation: false,
-          plugins: { legend: { labels: { color: '#a5f3fc' } } },
-          scales: {
-            x: { ticks: { color: '#94a3b8' } },
-            y: { ticks: { color: '#94a3b8' }, beginAtZero: true }
+  myChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { /* ... */ },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+
+      plugins: { 
+        legend: { labels: { color: '#a5f3fc' } },
+        // annotationプラグインを使うならここに書く
+        annotation: {
+          annotations: {
+            grokLine: {
+              type: 'line',
+              yMin: 1200,
+              yMax: 1200,
+              borderColor: '#ff3366',
+              borderWidth: 3,
+              borderDash: [6, 3],
+              label: {
+                content: '1200kcal',
+                enabled: true,
+                position: 'end',
+                backgroundColor: '#ff3366',
+                color: '#fff',
+                font: { size: 13, weight: 'bold' }
+              }
+            }
           }
-        },
-        annotation: {  // ← これを追加
-      annotations: {
-        grokLine: {
-          type: 'line',
-          yMin: 1200,
-          yMax: 1200,
-          borderColor: '#ff3366',
-          borderWidth: 3,
-          borderDash: [6, 3],
-          label: {
-            content: '1200kcal',
-            enabled: true,
-            position: 'end',
-            backgroundColor: '#ff3366',
-            color: '#fff',
-            font: { size: 13, weight: 'bold' }
-          }
+        }
+      },
+
+      scales: {
+        x: { ticks: { color: '#94a3b8' } },
+        y: { 
+          ticks: { color: '#94a3b8' }, 
+          beginAtZero: true,
+          suggestedMax: 2500
         }
       }
     }
-  },
-  scales: {
-    x: { ticks: { color: '#94a3b8' } },
-    y: { 
-      ticks: { color: '#94a3b8' }, 
-      beginAtZero: true,
-      suggestedMax: 2500  // 見やすさ用
-    }
-  }
+  });
+}
       });
     }
 
