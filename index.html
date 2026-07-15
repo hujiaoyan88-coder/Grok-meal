@@ -204,7 +204,36 @@
             x: { ticks: { color: '#94a3b8' } },
             y: { ticks: { color: '#94a3b8' }, beginAtZero: true }
           }
+        },
+        annotation: {  // ← これを追加
+      annotations: {
+        grokLine: {
+          type: 'line',
+          yMin: 1200,
+          yMax: 1200,
+          borderColor: '#ff3366',
+          borderWidth: 3,
+          borderDash: [6, 3],
+          label: {
+            content: '1200kcal',
+            enabled: true,
+            position: 'end',
+            backgroundColor: '#ff3366',
+            color: '#fff',
+            font: { size: 13, weight: 'bold' }
+          }
         }
+      }
+    }
+  },
+  scales: {
+    x: { ticks: { color: '#94a3b8' } },
+    y: { 
+      ticks: { color: '#94a3b8' }, 
+      beginAtZero: true,
+      suggestedMax: 2500  // 見やすさ用
+    }
+  }.
       });
     }
 
