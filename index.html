@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>GROK CALORIE</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.1.0/dist/chartjs-plugin-annotation.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto+Mono&display=swap');
     
@@ -87,6 +88,37 @@
     }
     .graph-card { height: 340px; position: relative; }
     canvas { width: 100% !important; height: 100% !important; border-radius: 12px; background: #0f172a; }
+    
+    /* 電卓用スタイル */
+    .calc-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .calc-buttons button {
+      padding: 14px 0;
+      font-size: 1.25em;
+      background: #1e2937;
+      color: #00ffcc;
+      border: 1px solid #00ffcc;
+      border-radius: 10px;
+      box-shadow: none;
+      margin: 0;
+    }
+    .calc-buttons button.op {
+      background: #0f766e;
+      color: #fff;
+    }
+    .calc-buttons button.eq {
+      background: linear-gradient(45deg, #00ffcc, #00bbff);
+      color: #000;
+    }
+    .calc-buttons button.clear {
+      background: #ff3366;
+      color: #fff;
+      border-color: #ff3366;
+    }
   </style>
 </head>
 <body>
@@ -102,7 +134,43 @@
         <option value="間食">間食</option>
       </select>
       <input type="number" id="calories" placeholder="カロリー入力" inputmode="numeric">
+      <button onclick="toggleCalc()" style="background: linear-gradient(45deg, #ffaa00, #ff6600); margin-top: 4px;">
+        🧮 電卓を使う
+      </button>
       <button onclick="addMeal()">＋ 記録する</button>
+    </div>
+
+    <!-- 電卓カード（初期非表示） -->
+    <div class="card" id="calcCard" style="display:none;">
+      <input type="text" id="calcDisplay" value="0" readonly style="text-align:right; font-size:1.6em; letter-spacing:1px;">
+      <div class="calc-buttons">
+        <button class="clear" onclick="clearCalc()">C</button>
+        <button onclick="appendCalc('(')">(</button>
+        <button onclick="appendCalc(')')">)</button>
+        <button class="op" onclick="appendCalc('/')">÷</button>
+
+        <button onclick="appendCalc('7')">7</button>
+        <button onclick="appendCalc('8')">8</button>
+        <button onclick="appendCalc('9')">9</button>
+        <button class="op" onclick="appendCalc('*')">×</button>
+
+        <button onclick="appendCalc('4')">4</button>
+        <button onclick="appendCalc('5')">5</button>
+        <button onclick="appendCalc('6')">6</button>
+        <button class="op" onclick="appendCalc('-')">−</button>
+
+        <button onclick="appendCalc('1')">1</button>
+        <button onclick="appendCalc('2')">2</button>
+        <button onclick="appendCalc('3')">3</button>
+        <button class="op" onclick="appendCalc('+')">＋</button>
+
+        <button onclick="appendCalc('0')">0</button>
+        <button onclick="appendCalc('.')">.</button>
+        <button class="eq" onclick="calculate()" style="grid-column: span 2;">＝</button>
+      </div>
+      <button onclick="applyCalc()" style="background: linear-gradient(45deg, #00ccff, #00ffaa);">
+        カロリーに適用
+      </button>
     </div>
 
     <div class="card">
@@ -116,6 +184,13 @@
 
     <div class="card graph-card">
       <canvas id="myChart"></canvas>
+    </div>
+
+    <!-- 平均値表示 -->
+    <div class="card" style="text-align:center; padding: 16px;">
+      <div style="font-size:1.35em; color:#67f7cc;">
+        1日平均　<b id="avgCalories">-</b> kcal
+      </div>
     </div>
   </div>
 
@@ -172,71 +247,91 @@
     }
 
     function updateGraph() {
-  const allData = getData();
-  const dates = Object.keys(allData).sort();
-  const totals = dates.map(d => allData[d].reduce((sum, e) => sum + e.cal, 0));
+      const allData = getData();
+      const selectedDate = dateInput.value;
+      if (!selectedDate) return;
 
-  if (dates.length === 0) return;
+      const yearMonth = selectedDate.slice(0, 7); // YYYY-MM
+      const dates = Object.keys(allData).filter(d => d.startsWith(yearMonth)).sort();
+      const totals = dates.map(d => allData[d].reduce((sum, e) => sum + e.cal, 0));
 
-  const ctx = document.getElementById('myChart').getContext('2d');
+      const avgEl = document.getElementById('avgCalories');
 
-  if (myChartInstance) myChartInstance.destroy();
+      if (dates.length === 0) {
+        avgEl.textContent = '-';
+        if (myChartInstance) {
+          myChartInstance.destroy();
+          myChartInstance = null;
+        }
+        return;
+      }
 
-  myChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: dates,
-      datasets: [{
-        label: '1日の合計カロリー',
-        data: totals,
-        borderColor: '#00ffcc',
-        backgroundColor: 'rgba(0, 255, 204, 0.25)',
-        tension: 0.4,
-        borderWidth: 4
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: false,
+      const avg = Math.round(totals.reduce((a, b) => a + b, 0) / totals.length);
+      avgEl.textContent = avg;
 
-      plugins: { 
-        legend: { 
-          labels: { color: '#a5f3fc' } 
+      const ctx = document.getElementById('myChart').getContext('2d');
+      if (myChartInstance) myChartInstance.destroy();
+
+      myChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: [{
+            label: '1日の合計カロリー',
+            data: totals,
+            borderColor: '#00ffcc',
+            backgroundColor: 'rgba(0, 255, 204, 0.25)',
+            tension: 0.4,
+            borderWidth: 4,
+            fill: true
+          }]
         },
-        annotation: {
-          annotations: {
-            grokLine: {
-              type: 'line',
-              yMin: 1200,
-              yMax: 1200,
-              borderColor: '#ff3366',
-              borderWidth: 3,
-              borderDash: [6, 3],
-              label: {
-                content: '1200kcal',
-                enabled: true,
-                position: 'end',
-                backgroundColor: '#ff3366',
-                color: '#fff',
-                font: { size: 13, weight: 'bold' }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          plugins: {
+            title: {
+              display: true,
+              text: yearMonth + ' のカロリー推移',
+              color: '#a5f3fc',
+              font: { size: 16, weight: 'bold' }
+            },
+            legend: {
+              labels: { color: '#a5f3fc' }
+            },
+            annotation: {
+              annotations: {
+                grokLine: {
+                  type: 'line',
+                  yMin: 1200,
+                  yMax: 1200,
+                  borderColor: '#ff3366',
+                  borderWidth: 3,
+                  borderDash: [6, 3],
+                  label: {
+                    content: '1200kcal',
+                    display: true,
+                    position: 'end',
+                    backgroundColor: '#ff3366',
+                    color: '#fff',
+                    font: { size: 13, weight: 'bold' }
+                  }
+                }
               }
+            }
+          },
+          scales: {
+            x: { ticks: { color: '#94a3b8' } },
+            y: {
+              ticks: { color: '#94a3b8' },
+              beginAtZero: true,
+              suggestedMax: 2500
             }
           }
         }
-      },
-
-      scales: {
-        x: { ticks: { color: '#94a3b8' } },
-        y: { 
-          ticks: { color: '#94a3b8' }, 
-          beginAtZero: true,
-          suggestedMax: 2500
-        }
-      }
+      });
     }
-  });
-}
 
     function exportMonthlyReport() {
       const allData = getData();
@@ -266,10 +361,53 @@
       alert("✅ レポートを出力しました！");
     }
 
+    // ===== 電卓機能 =====
+    function toggleCalc() {
+      const card = document.getElementById('calcCard');
+      card.style.display = card.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function appendCalc(val) {
+      const display = document.getElementById('calcDisplay');
+      if (display.value === '0' && val !== '.') {
+        display.value = val;
+      } else {
+        display.value += val;
+      }
+    }
+
+    function clearCalc() {
+      document.getElementById('calcDisplay').value = '0';
+    }
+
+    function calculate() {
+      const display = document.getElementById('calcDisplay');
+      try {
+        // ×÷を* / に変換して計算
+        let expr = display.value.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
+        const result = Function('"use strict"; return (' + expr + ')')();
+        display.value = Number.isFinite(result) ? Math.round(result * 100) / 100 : 'Error';
+      } catch {
+        display.value = 'Error';
+      }
+    }
+
+    function applyCalc() {
+      const display = document.getElementById('calcDisplay');
+      const val = parseFloat(display.value);
+      if (!isNaN(val) && val > 0) {
+        document.getElementById('calories').value = Math.round(val);
+        document.getElementById('calcCard').style.display = 'none';
+        clearCalc();
+      } else {
+        alert('有効な数値を計算してから適用してくれ');
+      }
+    }
+
     // 初回読み込み
     window.onload = () => {
       renderToday();
-      updateGraph();        // 最初からグラフ表示
+      updateGraph();
     };
 
     // 日付変更時も更新
