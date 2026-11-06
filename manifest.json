@@ -1,0 +1,23 @@
+{
+  "name": "GROK CALORIE",
+  "short_name": "GROK CAL",
+  "description": "カロリー記録アプリ",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#00ffcc",
+  "icons": [
+    {
+      "src": "Grok-meal.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "Grok-meal.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
